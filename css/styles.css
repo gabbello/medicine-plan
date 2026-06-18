@@ -476,3 +476,13 @@ input:focus { border-color: var(--accent); }
   padding-top: 16px;
   border-top: 1px solid var(--border);
 }
+
+#install-btn {
+  background: linear-gradient(135deg, var(--accent-light), #e0f5f0);
+  border-color: var(--accent);
+}
+
+#install-btn:hover {
+  background: linear-gradient(135deg, #d8ede6, #d0ebe6);
+  border-color: var(--accent);
+}

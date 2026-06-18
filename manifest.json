@@ -1,6 +1,6 @@
 {
-  "name": "Medicamente",
-  "short_name": "Medicamente",
+  "name": "MedPlan",
+  "short_name": "MedPlan",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f7f6f2",

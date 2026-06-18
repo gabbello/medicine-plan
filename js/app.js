@@ -1,3 +1,26 @@
+// ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('install-btn').style.display = 'block';
+});
+
+window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
+  document.getElementById('install-btn').style.display = 'none';
+});
+
+function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('install-btn').style.display = 'none';
+  });
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'medplan_v1';
 const SHARE_PARAM = 'plan';
