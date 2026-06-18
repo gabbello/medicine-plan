@@ -2,7 +2,7 @@
 
 ## Principles
 
-Everything runs client-side. There is no server, no API, no build pipeline. The entire app is one HTML file. All state lives either in `localStorage` or in JS variables for session-only state (e.g. "taken" card state). Adding a backend or bundler is an intentional future decision, not an oversight.
+Everything runs client-side. There is no server, no API, no build pipeline. HTML markup is in `index.html`, styles in `css/styles.css`, and application logic in `js/app.js`. All state lives either in `localStorage` or in JS variables for session-only state (e.g. "taken" card state). Adding a backend or bundler is an intentional future decision, not an oversight.
 
 ## Screen flow
 
@@ -57,18 +57,11 @@ Single key: `medplan_v1`. Value is a JSON object:
 
 `duration.type` is either `"ongoing"` or `"days"`. If `"days"`, `duration.days` is a positive integer.
 
-## JS structure
+## File structure
 
-All logic is in a single `<script>` tag at the bottom of `index.html`, organized into sections marked with comments:
-
-- **STATE** — `draft` object (periods + medicines being built), `loadPlan()`, `savePlan()`, `uuid()`
-- **ROUTING** — `showScreen(id)`, `goToStep1()`, `goToStep2()`
-- **STEP 1** — `togglePeriod(btn)`
-- **STEP 2** — `buildPeriodChecks()`, `selectDuration()`, `resetMedForm()`, `addMedicine()`, `deleteMedicine()`, `renderMedicineList()`, `updateSubmitBtn()`, `submitPlan()`
-- **DASHBOARD** — `buildDashboard(plan)`, `switchTab(period)`, `autoSelectTab(periods)`
-- **RESET** — `showResetDialog()`, `hideResetDialog()`, `confirmReset()`
-- **VISIBILITY CHANGE** — re-runs `autoSelectTab` when app returns to foreground
-- **INIT** — immediately-invoked function that reads localStorage and routes to the correct screen on load
+- **index.html** — HTML markup only. References external CSS and JS files.
+- **css/styles.css** — All CSS rules organized into logical sections (typography, forms, dashboard, dialogs, etc).
+- **js/app.js** — Application logic, organized into sections marked with comments (STATE, ROUTING, STEP 1, STEP 2, DASHBOARD, RESET, VISIBILITY CHANGE, INIT).
 
 ## Tab auto-selection logic
 

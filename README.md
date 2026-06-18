@@ -17,7 +17,11 @@ Single HTML file + manifest + service worker. No framework, no build step, no de
 ## Files
 
 ```
-index.html       — entire app (markup, styles, logic)
+index.html       — markup & PWA meta (no embedded styles or scripts)
+css/
+  └─ styles.css  — all component and layout styles
+js/
+  └─ app.js      — application logic & state management
 manifest.json    — PWA metadata (name, icons, theme color, start_url)
 sw.js            — minimal service worker (network-first fetch)
 icon-192.png     — PWA icon
