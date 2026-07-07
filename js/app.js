@@ -2,11 +2,36 @@
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').then(reg => {
     console.log('Service Worker registered:', reg);
-    updateDebug('✓ Service Worker\nregistered');
+    console.log('SW state:', reg.installing, reg.waiting, reg.active);
+    updateDebug('✓ SW registered\n⏳ Activating...');
+    
+    // Listen for state changes
+    if (reg.waiting) {
+      console.log('SW is waiting');
+    }
+    
+    reg.addEventListener('updatefound', () => {
+      const newWorker = reg.installing;
+      console.log('New SW installing:', newWorker);
+      newWorker.addEventListener('statechange', () => {
+        console.log('SW state changed:', newWorker.state);
+      });
+    });
+    
+    // Check if already active
+    setTimeout(() => {
+      if (reg.active) {
+        console.log('SW is now active');
+        updateDebug('✓ SW active\n⏳ Ready for install...');
+      }
+    }, 500);
+    
   }).catch(err => {
     console.error('SW registration failed:', err);
-    updateDebug('✗ Service Worker\nregistration failed');
+    updateDebug('✗ SW failed:\n' + err.message);
   });
+} else {
+  updateDebug('✗ SW not supported');
 }
 
 // ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
@@ -69,6 +94,14 @@ window.addEventListener('beforeinstallprompt', (e) => {
     console.log('Showing footer button');
   }
 });
+
+// Timeout to detect if install prompt never fires
+setTimeout(() => {
+  if (!deferredPrompt) {
+    console.warn('Install prompt did not fire after 5 seconds');
+    updateDebug('⚠️ No install\nprompt detected\n(Check PWA\nrequirements)');
+  }
+}, 5000);
 
 window.addEventListener('appinstalled', () => {
   console.log('appinstalled event fired!');
