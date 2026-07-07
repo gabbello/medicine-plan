@@ -563,3 +563,16 @@ body.install-bar-visible {
   border-bottom: 1px solid #0f0;
   padding-bottom: 4px;
 }
+
+.debug-btn {
+  background: #0f0;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 0.6rem;
+  font-weight: bold;
+  margin-top: 6px;
+  cursor: pointer;
+  font-family: monospace;
+}

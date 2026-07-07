@@ -56,17 +56,29 @@ function checkPWAStatus() {
   }
   
   // Check manifest
-  if (document.querySelector('link[rel="manifest"]')) {
-    status += '✓ Manifest found\n';
+  const manifestLink = document.querySelector('link[rel="manifest"]');
+  if (manifestLink) {
+    status += '✓ Manifest link\n';
+    // Try to fetch manifest
+    fetch(manifestLink.href)
+      .then(r => r.json())
+      .then(manifest => {
+        console.log('Manifest loaded:', manifest);
+        updateDebug(status.trim() + '\n✓ Manifest valid');
+      })
+      .catch(err => {
+        console.error('Manifest fetch failed:', err);
+        updateDebug(status.trim() + '\n✗ Manifest error');
+      });
   } else {
-    status += '✗ No manifest\n';
+    status += '✗ No manifest link\n';
   }
   
   // Check service worker
   if ('serviceWorker' in navigator) {
-    status += '⏳ Registering SW...\n';
+    status += '⏳ Registering SW...';
   } else {
-    status += '✗ No SW support\n';
+    status += '✗ No SW support';
   }
   
   updateDebug(status);
@@ -96,12 +108,27 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 // Timeout to detect if install prompt never fires
-setTimeout(() => {
-  if (!deferredPrompt) {
-    console.warn('Install prompt did not fire after 5 seconds');
-    updateDebug('⚠️ No install\nprompt detected\n(Check PWA\nrequirements)');
+// Note: Chrome sometimes requires user interaction first
+let installPromptTimeout;
+function startInstallPromptTimer() {
+  installPromptTimeout = setTimeout(() => {
+    if (!deferredPrompt) {
+      console.warn('Install prompt did not fire after 8 seconds');
+      updateDebug('⚠️ No install\nprompt yet\n\n(Try interacting\nwith the page)');
+    }
+  }, 8000);
+}
+
+// Listen for user interaction to trigger install prompt detection
+document.addEventListener('click', () => {
+  console.log('User clicked, checking for install prompt');
+  if (!deferredPrompt && !installPromptTimeout) {
+    updateDebug('⏳ Checking for\ninstall prompt\nafter interaction...');
+    startInstallPromptTimer();
   }
-}, 5000);
+}, { once: true });
+
+startInstallPromptTimer();
 
 window.addEventListener('appinstalled', () => {
   console.log('appinstalled event fired!');
@@ -135,6 +162,35 @@ function installApp() {
     const footerBtn = document.getElementById('install-btn-footer');
     if (footerBtn) footerBtn.style.display = 'none';
   });
+}
+
+function clearSWAndReload() {
+  console.log('Clearing service workers and cache...');
+  updateDebug('⏳ Clearing SW\nand cache...');
+  
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      registrations.forEach(reg => {
+        reg.unregister();
+        console.log('Unregistered SW');
+      });
+    });
+  }
+  
+  // Clear all caches
+  if ('caches' in window) {
+    caches.keys().then(names => {
+      names.forEach(name => {
+        caches.delete(name);
+        console.log('Deleted cache:', name);
+      });
+    });
+  }
+  
+  // Hard reload
+  setTimeout(() => {
+    location.reload(true);
+  }, 500);
 }
 
 // Log to check if script is loaded
