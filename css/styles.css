@@ -517,10 +517,6 @@ input:focus { border-color: var(--accent); }
   justify-content: center;
 }
 
-.install-bar.active {
-  display: flex;
-}
-
 .btn-install-floating {
   background: rgba(255, 255, 255, 0.95);
   color: var(--accent);
