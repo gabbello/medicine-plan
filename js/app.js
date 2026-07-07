@@ -1,200 +1,41 @@
 // ─── PWA SERVICE WORKER REGISTRATION ───────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').then(reg => {
-    console.log('Service Worker registered:', reg);
-    console.log('SW state:', reg.installing, reg.waiting, reg.active);
-    updateDebug('✓ SW registered\n⏳ Activating...');
-    
-    // Listen for state changes
-    if (reg.waiting) {
-      console.log('SW is waiting');
-    }
-    
-    reg.addEventListener('updatefound', () => {
-      const newWorker = reg.installing;
-      console.log('New SW installing:', newWorker);
-      newWorker.addEventListener('statechange', () => {
-        console.log('SW state changed:', newWorker.state);
-      });
-    });
-    
-    // Check if already active
-    setTimeout(() => {
-      if (reg.active) {
-        console.log('SW is now active');
-        updateDebug('✓ SW active\n⏳ Ready for install...');
-      }
-    }, 500);
-    
-  }).catch(err => {
-    console.error('SW registration failed:', err);
-    updateDebug('✗ SW failed:\n' + err.message);
+  navigator.serviceWorker.register('sw.js').catch(() => {
+    // Ignore service worker registration errors silently
   });
-} else {
-  updateDebug('✗ SW not supported');
 }
 
 // ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
 let deferredPrompt = null;
 
-function updateDebug(message) {
-  const debugStatus = document.getElementById('debug-status');
-  if (debugStatus) {
-    debugStatus.textContent = message;
-  }
-}
-
-// Check PWA readiness
-function checkPWAStatus() {
-  let status = '';
-  
-  // Check https or localhost
-  if (location.protocol === 'https:' || location.hostname === 'localhost') {
-    status += '✓ HTTPS/localhost\n';
-  } else {
-    status += '✗ Not HTTPS\n';
-  }
-  
-  // Check manifest
-  const manifestLink = document.querySelector('link[rel="manifest"]');
-  if (manifestLink) {
-    status += '✓ Manifest link\n';
-    // Try to fetch manifest
-    fetch(manifestLink.href)
-      .then(r => r.json())
-      .then(manifest => {
-        console.log('Manifest loaded:', manifest);
-        updateDebug(status.trim() + '\n✓ Manifest valid');
-      })
-      .catch(err => {
-        console.error('Manifest fetch failed:', err);
-        updateDebug(status.trim() + '\n✗ Manifest error');
-      });
-  } else {
-    status += '✗ No manifest link\n';
-  }
-  
-  // Check service worker
-  if ('serviceWorker' in navigator) {
-    status += '⏳ Registering SW...';
-  } else {
-    status += '✗ No SW support';
-  }
-  
-  updateDebug(status);
-}
-
-checkPWAStatus();
-
 window.addEventListener('beforeinstallprompt', (e) => {
-  console.log('beforeinstallprompt event fired!', e);
   e.preventDefault();
   deferredPrompt = e;
-  
-  updateDebug('✓ Install prompt\navailable!\n\n⬇️ Tap button\nto install');
-  
-  // Show both the floating bar and footer button
+
   const installBar = document.getElementById('install-bar');
   if (installBar) {
     installBar.style.display = 'flex';
-    console.log('Showing install bar');
-  }
-  
-  const footerBtn = document.getElementById('install-btn-footer');
-  if (footerBtn) {
-    footerBtn.style.display = 'block';
-    console.log('Showing footer button');
   }
 });
 
-// Timeout to detect if install prompt never fires
-// Note: Chrome sometimes requires user interaction first
-let installPromptTimeout;
-function startInstallPromptTimer() {
-  installPromptTimeout = setTimeout(() => {
-    if (!deferredPrompt) {
-      console.warn('Install prompt did not fire after 8 seconds');
-      updateDebug('⚠️ No install\nprompt yet\n\n(Try interacting\nwith the page)');
-    }
-  }, 8000);
-}
-
-// Listen for user interaction to trigger install prompt detection
-document.addEventListener('click', () => {
-  console.log('User clicked, checking for install prompt');
-  if (!deferredPrompt && !installPromptTimeout) {
-    updateDebug('⏳ Checking for\ninstall prompt\nafter interaction...');
-    startInstallPromptTimer();
-  }
-}, { once: true });
-
-startInstallPromptTimer();
-
 window.addEventListener('appinstalled', () => {
-  console.log('appinstalled event fired!');
   deferredPrompt = null;
-  updateDebug('✓ App installed!');
-  
+
   const installBar = document.getElementById('install-bar');
   if (installBar) installBar.style.display = 'none';
-  
-  const footerBtn = document.getElementById('install-btn-footer');
-  if (footerBtn) footerBtn.style.display = 'none';
 });
 
 function installApp() {
-  console.log('installApp() called, deferredPrompt:', deferredPrompt);
-  updateDebug('Install prompt\nshown...');
-  
-  if (!deferredPrompt) {
-    console.log('No deferredPrompt available');
-    updateDebug('✗ No prompt\navailable');
-    return;
-  }
+  if (!deferredPrompt) return;
+
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then((result) => {
-    console.log('Install prompt result:', result);
-    updateDebug('Result:\n' + result.outcome);
+  deferredPrompt.userChoice.then(() => {
     deferredPrompt = null;
+
     const installBar = document.getElementById('install-bar');
     if (installBar) installBar.style.display = 'none';
-    
-    const footerBtn = document.getElementById('install-btn-footer');
-    if (footerBtn) footerBtn.style.display = 'none';
   });
 }
-
-function clearSWAndReload() {
-  console.log('Clearing service workers and cache...');
-  updateDebug('⏳ Clearing SW\nand cache...');
-  
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(reg => {
-        reg.unregister();
-        console.log('Unregistered SW');
-      });
-    });
-  }
-  
-  // Clear all caches
-  if ('caches' in window) {
-    caches.keys().then(names => {
-      names.forEach(name => {
-        caches.delete(name);
-        console.log('Deleted cache:', name);
-      });
-    });
-  }
-  
-  // Hard reload
-  setTimeout(() => {
-    location.reload(true);
-  }, 500);
-}
-
-// Log to check if script is loaded
-console.log('app.js loaded');
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'medplan_v1';
@@ -219,6 +60,37 @@ function savePlan(plan) {
 
 function showMessage(message) {
   alert(message);
+}
+
+function clearMedicineFormErrors() {
+  document.querySelectorAll('.form-group.invalid').forEach(el => el.classList.remove('invalid'));
+  document.querySelectorAll('.duration-days-input.invalid').forEach(el => el.classList.remove('invalid'));
+  document.querySelectorAll('.period-check.invalid').forEach(el => el.classList.remove('invalid'));
+  document.querySelectorAll('.field-error-message.active').forEach(el => {
+    el.textContent = '';
+    el.classList.remove('active');
+  });
+}
+
+function showMedicineFieldError(target, message) {
+  const group = target.closest('.form-group') || target.closest('.duration-days-input');
+  const errorEl = group?.querySelector('.field-error-message');
+  if (group) group.classList.add('invalid');
+  if (target.classList.contains('period-check')) target.classList.add('invalid');
+  if (target.classList.contains('duration-days-input')) target.classList.add('invalid');
+  if (errorEl) {
+    errorEl.textContent = message;
+    errorEl.classList.add('active');
+  }
+}
+
+function focusFirstMedicineError() {
+  const invalidGroup = document.querySelector('.form-group.invalid, .duration-days-input.invalid, .period-check.invalid');
+  if (!invalidGroup) return;
+
+  invalidGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  const focusTarget = invalidGroup.querySelector('input, textarea, button, .period-check') || invalidGroup;
+  if (focusTarget && typeof focusTarget.focus === 'function') focusTarget.focus();
 }
 
 function uuid() {
@@ -496,12 +368,16 @@ function buildPeriodChecks() {
     btn.className = 'period-check';
     btn.dataset.period = p;
     btn.textContent = PERIOD_META[p].icon + ' ' + PERIOD_META[p].label;
-    btn.onclick = () => btn.classList.toggle('selected');
+    btn.onclick = () => {
+      btn.classList.toggle('selected');
+      clearMedicineFormErrors();
+    };
     wrap.appendChild(btn);
   });
 }
 
 function selectDuration(btn) {
+  clearMedicineFormErrors();
   document.querySelectorAll('.duration-toggle').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   const wrap = document.getElementById('duration-days-wrap');
@@ -510,6 +386,7 @@ function selectDuration(btn) {
 }
 
 function resetMedForm() {
+  clearMedicineFormErrors();
   document.getElementById('med-name').value = '';
   document.getElementById('med-amount').value = '';
   document.getElementById('med-unit').value = '';
@@ -522,22 +399,38 @@ function resetMedForm() {
 }
 
 function addMedicine() {
-  const name = document.getElementById('med-name').value.trim();
+  clearMedicineFormErrors();
+
+  const nameInput = document.getElementById('med-name');
+  const periodsWrap = document.getElementById('period-checks');
+  const durationDaysInput = document.getElementById('duration-days');
+  const name = nameInput.value.trim();
   const amount = document.getElementById('med-amount').value.trim();
   const unit = document.getElementById('med-unit').value.trim();
   const note = document.getElementById('med-note').value.trim();
   const selectedPeriods = [...document.querySelectorAll('.period-check.selected')].map(b => b.dataset.period);
   const durType = document.querySelector('.duration-toggle.selected').dataset.val;
-  const durDaysValue = document.getElementById('duration-days').value.trim();
+  const durDaysValue = durationDaysInput.value.trim();
   const durDays = durDaysValue === '' ? null : parseInt(durDaysValue, 10);
+  let hasError = false;
 
-  if (!name || selectedPeriods.length === 0) {
-    alert('Please enter a name and select at least one period.');
-    return;
+  if (!name) {
+    showMedicineFieldError(nameInput, 'Please enter a medicine name.');
+    hasError = true;
+  }
+
+  if (selectedPeriods.length === 0) {
+    showMedicineFieldError(periodsWrap, 'Please select at least one period.');
+    hasError = true;
   }
 
   if (durType === 'days' && (!Number.isInteger(durDays) || durDays <= 0)) {
-    alert('Please enter the number of days for Limited duration.');
+    showMedicineFieldError(durationDaysInput, 'Please enter the number of days for Limited duration.');
+    hasError = true;
+  }
+
+  if (hasError) {
+    focusFirstMedicineError();
     return;
   }
 

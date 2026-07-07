@@ -155,6 +155,34 @@ body {
 
 .form-group:last-child { margin-bottom: 0; }
 
+.form-group.invalid label {
+  color: var(--danger);
+}
+
+.form-group.invalid input,
+.form-group.invalid .period-check,
+.duration-days-input.invalid input,
+.period-check.invalid {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 1px rgba(192, 57, 43, 0.12);
+}
+
+.form-group.invalid .period-check {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+.field-error-message {
+  display: none;
+  color: var(--danger);
+  font-size: 0.74rem;
+  margin-top: 2px;
+}
+
+.field-error-message.active {
+  display: block;
+}
+
 label {
   font-size: 0.7rem;
   text-transform: uppercase;
