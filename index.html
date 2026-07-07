@@ -15,14 +15,7 @@
 
 <!-- FLOATING INSTALL BAR -->
 <div id="install-bar" class="install-bar" style="display:none">
-  <button class="btn-install-floating" id="install-btn" onclick="installApp()">📱 Add to Home screen</button>
-</div>
-
-<!-- DEBUG PANEL -->
-<div id="debug-panel" class="debug-panel">
-  <div class="debug-title">PWA Debug</div>
-  <div id="debug-status">Checking...</div>
-  <button id="debug-clear-sw" class="debug-btn" onclick="clearSWAndReload()">Clear SW</button>
+  <button class="btn-install-floating" id="install-btn" onclick="installApp()">Add to Home screen</button>
 </div>
 
 <!-- HOME -->
@@ -128,7 +121,6 @@
   <div id="dash-contents"></div>
 
   <div class="dash-footer">
-    <button class="btn btn-outline-accent" id="install-btn-footer" onclick="installApp()" style="display:none;margin-bottom:10px">📱 Add to Home screen</button>
     <button class="btn btn-outline-accent" onclick="handleSharePlan()">Share plan</button>
     <button class="btn btn-danger" onclick="showResetDialog()">Reset plan</button>
   </div>
