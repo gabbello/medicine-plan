@@ -1,28 +1,101 @@
 // ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
 let deferredPrompt = null;
 
+function updateDebug(message) {
+  const debugStatus = document.getElementById('debug-status');
+  if (debugStatus) {
+    debugStatus.textContent = message;
+  }
+}
+
+// Check PWA readiness
+function checkPWAStatus() {
+  let status = '';
+  
+  // Check https or localhost
+  if (location.protocol === 'https:' || location.hostname === 'localhost') {
+    status += '✓ HTTPS/localhost\n';
+  } else {
+    status += '✗ Not HTTPS\n';
+  }
+  
+  // Check manifest
+  if (document.querySelector('link[rel="manifest"]')) {
+    status += '✓ Manifest found\n';
+  } else {
+    status += '✗ No manifest\n';
+  }
+  
+  // Check service worker
+  if ('serviceWorker' in navigator) {
+    status += '✓ SW supported\n';
+  } else {
+    status += '✗ No SW support\n';
+  }
+  
+  status += '⏳ Waiting for prompt...';
+  updateDebug(status);
+}
+
+checkPWAStatus();
+
 window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt event fired!', e);
   e.preventDefault();
   deferredPrompt = e;
+  
+  updateDebug('✓ Install prompt\navailable!\n\nTap button to\ninstall app');
+  
+  // Show both the floating bar and footer button
   const installBar = document.getElementById('install-bar');
-  if (installBar) installBar.style.display = 'flex';
+  if (installBar) {
+    installBar.style.display = 'flex';
+    console.log('Showing install bar');
+  }
+  
+  const footerBtn = document.getElementById('install-btn-footer');
+  if (footerBtn) {
+    footerBtn.style.display = 'block';
+    console.log('Showing footer button');
+  }
 });
 
 window.addEventListener('appinstalled', () => {
+  console.log('appinstalled event fired!');
   deferredPrompt = null;
+  updateDebug('✓ App installed!');
+  
   const installBar = document.getElementById('install-bar');
   if (installBar) installBar.style.display = 'none';
+  
+  const footerBtn = document.getElementById('install-btn-footer');
+  if (footerBtn) footerBtn.style.display = 'none';
 });
 
 function installApp() {
-  if (!deferredPrompt) return;
+  console.log('installApp() called, deferredPrompt:', deferredPrompt);
+  updateDebug('Install prompt\nshown...');
+  
+  if (!deferredPrompt) {
+    console.log('No deferredPrompt available');
+    updateDebug('✗ No prompt\navailable');
+    return;
+  }
   deferredPrompt.prompt();
-  deferredPrompt.userChoice.then(() => {
+  deferredPrompt.userChoice.then((result) => {
+    console.log('Install prompt result:', result);
+    updateDebug('Result:\n' + result.outcome);
     deferredPrompt = null;
     const installBar = document.getElementById('install-bar');
     if (installBar) installBar.style.display = 'none';
+    
+    const footerBtn = document.getElementById('install-btn-footer');
+    if (footerBtn) footerBtn.style.display = 'none';
   });
 }
+
+// Log to check if script is loaded
+console.log('app.js loaded');
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'medplan_v1';

@@ -34,4 +34,4 @@ Drop all five files (or a zip containing them) onto [Netlify Drop](https://app.n
 
 ## Demo
 
-A real life demo of this app can be found [here](https://medicine-plan.netlify.app/)
+A real life demo of this app can be found [here](https://medicine-plan.netlify.app/).
