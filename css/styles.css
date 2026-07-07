@@ -569,10 +569,17 @@ body.install-bar-visible {
   color: #000;
   border: none;
   border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 0.6rem;
+  padding: 6px 10px;
+  font-size: 0.65rem;
   font-weight: bold;
-  margin-top: 6px;
+  margin-top: 8px;
   cursor: pointer;
   font-family: monospace;
+  width: 100%;
+  display: block;
+  transition: all 0.1s;
+}
+
+.debug-btn:active {
+  opacity: 0.7;
 }
