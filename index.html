@@ -13,6 +13,11 @@
 </head>
 <body>
 
+<!-- FLOATING INSTALL BAR -->
+<div id="install-bar" class="install-bar" style="display:none">
+  <button class="btn-install-floating" id="install-btn" onclick="installApp()">📱 Add to Home screen</button>
+</div>
+
 <!-- HOME -->
 <div id="screen-home" class="screen active">
   <div class="home-hero">
@@ -112,15 +117,14 @@
 <!-- DASHBOARD -->
 <div id="screen-dashboard" class="screen">
   <div class="date-line" id="dash-date"></div>
-  <p class="screen-note">This plan is stored only on this device. Use Share plan to open it in another browser or device.</p>
   <div class="tabs" id="dash-tabs"></div>
   <div id="dash-contents"></div>
 
   <div class="dash-footer">
-    <button class="btn btn-outline-accent" id="install-btn" onclick="installApp()" style="display:none;margin-bottom:10px">📱 Add to Home screen</button>
     <button class="btn btn-outline-accent" onclick="handleSharePlan()">Share plan</button>
     <button class="btn btn-danger" onclick="showResetDialog()">Reset plan</button>
   </div>
+    <p class="screen-note">This plan is stored only on this device. Use Share plan to open it in another browser or device.</p>
 </div>
 
 <!-- SHARE DIALOG -->

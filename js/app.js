@@ -4,12 +4,16 @@ let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('install-btn').style.display = 'block';
+  const installBar = document.getElementById('install-bar');
+  installBar.classList.add('active');
+  installBar.style.display = 'flex';
 });
 
 window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
-  document.getElementById('install-btn').style.display = 'none';
+  const installBar = document.getElementById('install-bar');
+  installBar.classList.remove('active');
+  installBar.style.display = 'none';
 });
 
 function installApp() {
@@ -17,7 +21,9 @@ function installApp() {
   deferredPrompt.prompt();
   deferredPrompt.userChoice.then(() => {
     deferredPrompt = null;
-    document.getElementById('install-btn').style.display = 'none';
+    const installBar = document.getElementById('install-bar');
+    installBar.classList.remove('active');
+    installBar.style.display = 'none';
   });
 }
 

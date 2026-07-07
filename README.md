@@ -31,3 +31,7 @@ icon-512.png     — PWA icon (large)
 ## Deploy
 
 Drop all five files (or a zip containing them) onto [Netlify Drop](https://app.netlify.com/drop). Netlify renames `index.html` automatically and serves from `/`. `start_url` in `manifest.json` must be `/` for the PWA shortcut to work correctly.
+
+## Demo
+
+A real life demo of this app can be found [here](https://medicine-plan.netlify.app/)
