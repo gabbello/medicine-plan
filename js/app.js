@@ -1,3 +1,14 @@
+// ─── PWA SERVICE WORKER REGISTRATION ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    console.log('Service Worker registered:', reg);
+    updateDebug('✓ Service Worker\nregistered');
+  }).catch(err => {
+    console.error('SW registration failed:', err);
+    updateDebug('✗ Service Worker\nregistration failed');
+  });
+}
+
 // ─── PWA INSTALL PROMPT ───────────────────────────────────────────────────────
 let deferredPrompt = null;
 
@@ -28,12 +39,11 @@ function checkPWAStatus() {
   
   // Check service worker
   if ('serviceWorker' in navigator) {
-    status += '✓ SW supported\n';
+    status += '⏳ Registering SW...\n';
   } else {
     status += '✗ No SW support\n';
   }
   
-  status += '⏳ Waiting for prompt...';
   updateDebug(status);
 }
 
@@ -44,7 +54,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
   
-  updateDebug('✓ Install prompt\navailable!\n\nTap button to\ninstall app');
+  updateDebug('✓ Install prompt\navailable!\n\n⬇️ Tap button\nto install');
   
   // Show both the floating bar and footer button
   const installBar = document.getElementById('install-bar');
