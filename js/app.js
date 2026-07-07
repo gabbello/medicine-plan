@@ -50,11 +50,27 @@ function uuid() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
 
+function formatEndDate(startDate, days) {
+  const start = new Date(startDate || Date.now());
+  if (Number.isNaN(start.getTime()) || !Number.isFinite(days) || days <= 0) return '';
+  const end = new Date(start);
+  end.setHours(0, 0, 0, 0);
+  end.setDate(end.getDate() + days - 1);
+  const day = end.getDate();
+  const month = end.toLocaleString('en-GB', { month: 'long' });
+  const suffix = (day % 10 === 1 && day !== 11) ? 'st'
+    : (day % 10 === 2 && day !== 12) ? 'nd'
+    : (day % 10 === 3 && day !== 13) ? 'rd'
+    : 'th';
+  return `${day}${suffix} of ${month}`;
+}
+
 // --- SHARE LINKS -------------------------------------------------------------
 function clonePlanForSharing(plan) {
   return {
     status: plan.status,
     periods: [...plan.periods],
+    startDate: plan.startDate || new Date().toISOString(),
     medicines: plan.medicines.map(m => ({
       id: m.id || uuid(),
       name: m.name || '',
@@ -337,10 +353,16 @@ function addMedicine() {
   const note = document.getElementById('med-note').value.trim();
   const selectedPeriods = [...document.querySelectorAll('.period-check.selected')].map(b => b.dataset.period);
   const durType = document.querySelector('.duration-toggle.selected').dataset.val;
-  const durDays = parseInt(document.getElementById('duration-days').value) || null;
+  const durDaysValue = document.getElementById('duration-days').value.trim();
+  const durDays = durDaysValue === '' ? null : parseInt(durDaysValue, 10);
 
   if (!name || selectedPeriods.length === 0) {
     alert('Please enter a name and select at least one period.');
+    return;
+  }
+
+  if (durType === 'days' && (!Number.isInteger(durDays) || durDays <= 0)) {
+    alert('Please enter the number of days for Limited duration.');
     return;
   }
 
@@ -392,7 +414,12 @@ function updateSubmitBtn() {
 }
 
 function submitPlan() {
-  const plan = { status: 'active', periods: draft.periods, medicines: draft.medicines };
+  const plan = {
+    status: 'active',
+    periods: draft.periods,
+    medicines: draft.medicines,
+    startDate: new Date().toISOString()
+  };
   savePlan(plan);
   buildDashboard(plan);
   showScreen('dashboard');
@@ -429,9 +456,15 @@ function buildDashboard(plan) {
     } else {
       content.innerHTML = meds.map(m => {
         const doseStr = [m.amount, m.unit].filter(Boolean).join(' ');
+        const endDateLabel = m.duration.type === 'days'
+          ? formatEndDate(plan.startDate, m.duration.days)
+          : '';
         const durBadge = m.duration.type === 'days'
           ? `<span class="dash-duration limited">${m.duration.days} days then stop</span>`
           : `<span class="dash-duration">Ongoing</span>`;
+        const endDateBadge = endDateLabel
+          ? `<span class="dash-duration dash-duration-end limited-end">Until ${endDateLabel}</span>`
+          : '';
         const noteEl = m.note ? `<div class="dash-note">${m.note}</div>` : '';
         return `
           <div class="dash-card" onclick="this.classList.toggle('taken')">
@@ -440,6 +473,7 @@ function buildDashboard(plan) {
               ${doseStr ? `<div class="dash-dose">${doseStr}</div>` : ''}
             </div>
             ${durBadge}
+            ${endDateBadge}
             ${noteEl}
           </div>`;
       }).join('');

@@ -340,6 +340,13 @@ input:focus { border-color: var(--accent); }
   margin-bottom: 8px;
 }
 
+.screen-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
 .tabs {
   display: flex;
   gap: 6px;
@@ -413,6 +420,24 @@ input:focus { border-color: var(--accent); }
 }
 
 .dash-duration.limited {
+  background: var(--warning-light);
+  color: var(--warning);
+  border-color: #f8d5a3;
+}
+
+.dash-duration-end {
+  font-size: 0.65rem;
+  border-radius: 16px;
+  padding: 2px 8px;
+  margin-top: 4px;
+  margin-left: 8px;
+  display: inline-block;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  background: var(--bg);
+}
+
+.dash-duration-end.limited-end {
   background: var(--warning-light);
   color: var(--warning);
   border-color: #f8d5a3;

@@ -18,7 +18,7 @@
   <div class="home-hero">
     <span class="home-icon">💊</span>
     <h1>MedPlan</h1>
-    <p>Build your personal medication schedule.<br>Everything stays on your device.<br> You can share your plan with other people or devices once the plan is ready.<br> You can add your plan as an app on your mobile device for quick access.</p>
+    <p>Build your personal medication schedule.<br>Everything stays only on your device and is not stored on our servers.<br> Use the Share plan button to open the same plan on another browser or device.<br> You can add your plan as an app on your mobile device for quick access.</p>
     <button class="btn btn-primary" onclick="goToStep1()">Create my plan</button>
   </div>
 </div>
@@ -66,7 +66,7 @@
 
     <div class="form-group">
       <label>Name</label>
-      <input type="text" id="med-name" placeholder="e.g. Tritace">
+      <input type="text" id="med-name" placeholder="e.g. Ibuprofen">
     </div>
 
     <div class="form-row">
@@ -112,6 +112,7 @@
 <!-- DASHBOARD -->
 <div id="screen-dashboard" class="screen">
   <div class="date-line" id="dash-date"></div>
+  <p class="screen-note">This plan is stored only on this device. Use Share plan to open it in another browser or device.</p>
   <div class="tabs" id="dash-tabs"></div>
   <div id="dash-contents"></div>
 
