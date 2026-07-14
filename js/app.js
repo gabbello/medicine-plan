@@ -37,6 +37,11 @@ function installApp() {
   });
 }
 
+function hideInstallBar() {
+  const installBar = document.getElementById('install-bar');
+  if (installBar) installBar.style.display = 'none';
+}
+
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'medplan_v1';
 const SHARE_PARAM = 'plan';
@@ -580,6 +585,24 @@ function confirmReset() {
   hideResetDialog();
   showScreen('home');
 }
+
+// Expose handlers used by inline onclick attributes in index.html.
+Object.assign(window, {
+  installApp,
+  hideInstallBar,
+  goToStep1,
+  togglePeriod,
+  goToStep2,
+  selectDuration,
+  addMedicine,
+  deleteMedicine,
+  submitPlan,
+  handleSharePlan,
+  hideShareDialog,
+  showResetDialog,
+  hideResetDialog,
+  confirmReset
+});
 
 // ─── VISIBILITY CHANGE ────────────────────────────────────────────────────────
 document.addEventListener('visibilitychange', function() {
