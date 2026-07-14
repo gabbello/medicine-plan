@@ -1,1 +1,18 @@
-@requirements
+# Development dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Test and coverage
+coverage/
+.nyc_output/
+
+# Local test files
+*.test.js
+*.spec.js
+
+# Local-only test harness
+TESTING.md
+vitest.config.js
+js/core.js
+package.json
