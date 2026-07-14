@@ -90,3 +90,22 @@ Card taken state (greyed out, ✓ suffix) is toggled by tapping a card. It is st
 - The `draft` variable is reset on every call to `goToStep1()`. Navigating back from step 2 to step 1 clears all added medicines — this is intentional.
 - Once a plan has `status: active`, the UI has no edit mode. The only mutation available is full reset. This is also intentional: it prevents partial edits that could leave the plan in an inconsistent state.
 - `uuid()` uses `Math.random()` — not cryptographically secure, but sufficient for local IDs.
+
+## Branch workflow for tests
+
+This repository uses a dedicated local branch for test harness and test-only changes:
+
+- `main` is the production branch. Keep it free of local-only test scaffolding.
+- `local-tests` is the branch where local test setup and test-focused changes are maintained.
+
+If a future change updates business logic (for example in `js/app.js`, `js/core.js`, plan validation, share logic, or storage behavior), follow this process:
+
+1. Implement and commit the business change on `main`.
+2. Merge `main` into `local-tests` so the local test branch includes the latest business logic.
+3. Run tests locally from `local-tests` (for example `npm test -- --run`).
+4. Fix any failures in `local-tests` first, then bring required production-safe fixes back to `main`.
+5. Push `main` to origin only after local tests pass for the merged business logic.
+
+Operational rule for agents and contributors:
+
+- Do not push `main` to production without confirming the corresponding business-logic state has been validated in `local-tests`.
