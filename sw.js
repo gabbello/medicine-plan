@@ -1,10 +1,12 @@
-const CACHE_NAME = 'medplan-v1';
+const CACHE_NAME = 'medplan-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/css/styles.css',
   '/js/app.js',
   '/manifest.json',
+  '/robots.txt',
+  '/og-image.svg',
   '/icon-192.png',
   '/icon-512.png'
 ];

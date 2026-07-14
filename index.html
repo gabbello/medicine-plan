@@ -3,19 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedPlan</title>
+<title>MedPlan | Personal Medication Schedule Planner</title>
+<meta name="description" content="Plan daily medicines in minutes with a private, no-account schedule tool. Build, share, and follow your medication plan on any device.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="https://med-plan.uk/">
+
+<meta property="og:title" content="MedPlan | Personal Medication Schedule Planner">
+<meta property="og:description" content="Build and share a private medication plan in minutes. No account, no backend, and easy to use on mobile.">
+<meta property="og:image" content="https://med-plan.uk/og-image.svg">
+<meta property="og:url" content="https://med-plan.uk/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MedPlan">
+
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#2d6a4f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="MedPlan">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="css/styles.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "MedPlan",
+  "url": "https://med-plan.uk/",
+  "description": "Plan daily medicines in minutes with a private, no-account schedule tool.",
+  "inLanguage": "en"
+}
+</script>
 </head>
 <body>
 
-<!-- FLOATING INSTALL BAR -->
-<div id="install-bar" class="install-bar" style="display:none">
-  <button class="btn-install-floating" id="install-btn" onclick="installApp()">Add to Home screen</button>
+<!-- INSTALL BAR -->
+<div id="install-bar" class="install-bar" style="display:none" role="status" aria-live="polite">
+  <span class="install-bar__text">Add MedPlan to your home screen for quicker access</span>
+  <button class="btn-install-floating" id="install-btn" onclick="installApp()">Install</button>
+  <button class="install-bar__close" id="install-close" onclick="hideInstallBar()" aria-label="Close install banner">×</button>
 </div>
 
 <!-- HOME -->
@@ -150,6 +174,6 @@
   </div>
 </div>
 
-<script src="js/app.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>
