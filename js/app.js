@@ -401,10 +401,22 @@ function showScreen(id) {
   document.getElementById('screen-' + id).classList.add('active');
 }
 
+function syncStep1PeriodSelection() {
+  document.querySelectorAll('.period-btn').forEach(btn => {
+    const isSelected = draft.periods.includes(btn.dataset.period);
+    btn.classList.toggle('selected', isSelected);
+  });
+  document.getElementById('btn-step1-next').disabled = draft.periods.length === 0;
+}
+
 function goToStep1() {
   draft = { periods: [], medicines: [] };
-  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('selected'));
-  document.getElementById('btn-step1-next').disabled = true;
+  syncStep1PeriodSelection();
+  showScreen('step1');
+}
+
+function goBackToStep1() {
+  syncStep1PeriodSelection();
   showScreen('step1');
 }
 
@@ -667,6 +679,7 @@ Object.assign(window, {
   installApp,
   hideInstallBar,
   goToStep1,
+  goBackToStep1,
   togglePeriod,
   goToStep2,
   selectDuration,
