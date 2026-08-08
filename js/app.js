@@ -44,6 +44,7 @@ function hideInstallBar() {
 
 // ─── STATE ───────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'medplan_v1';
+const TAKEN_STATUS_STORAGE_KEY = 'medplan_taken_status_v1';
 const SHARE_PARAM = 'plan';
 const SHARE_VERSION = 1;
 const MAX_SHARE_URL_LENGTH = 8000;
@@ -61,6 +62,72 @@ function loadPlan() {
 
 function savePlan(plan) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+}
+
+function getTodayKey() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function loadTakenStatus() {
+  try {
+    const raw = localStorage.getItem(TAKEN_STATUS_STORAGE_KEY);
+    if (!raw) return { date: getTodayKey(), items: {} };
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') {
+      localStorage.removeItem(TAKEN_STATUS_STORAGE_KEY);
+      return { date: getTodayKey(), items: {} };
+    }
+
+    if (parsed.date !== getTodayKey()) {
+      localStorage.removeItem(TAKEN_STATUS_STORAGE_KEY);
+      return { date: getTodayKey(), items: {} };
+    }
+
+    return {
+      date: parsed.date || getTodayKey(),
+      items: parsed.items && typeof parsed.items === 'object' ? parsed.items : {}
+    };
+  } catch {
+    localStorage.removeItem(TAKEN_STATUS_STORAGE_KEY);
+    return { date: getTodayKey(), items: {} };
+  }
+}
+
+function saveTakenStatus(state) {
+  const payload = {
+    date: getTodayKey(),
+    items: state && state.items ? state.items : {}
+  };
+  localStorage.setItem(TAKEN_STATUS_STORAGE_KEY, JSON.stringify(payload));
+}
+
+function isMedicineTaken(medicineId, period) {
+  const state = loadTakenStatus();
+  return Boolean(state.items[`${medicineId}:${period}`]);
+}
+
+function toggleMedicineTaken(medicineId, period) {
+  const state = loadTakenStatus();
+  const key = `${medicineId}:${period}`;
+  if (state.items[key]) {
+    delete state.items[key];
+  } else {
+    state.items[key] = true;
+  }
+  saveTakenStatus(state);
+  const plan = loadPlan();
+  if (plan && plan.status === 'active') {
+    buildDashboard(plan);
+  }
+}
+
+function clearTakenStatus() {
+  localStorage.removeItem(TAKEN_STATUS_STORAGE_KEY);
 }
 
 function showMessage(message) {
@@ -500,6 +567,9 @@ function submitPlan() {
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
 function buildDashboard(plan) {
+  const takenState = loadTakenStatus();
+  const activePeriod = document.querySelector('.tab-btn.active')?.dataset.period || null;
+
   // Date
   const now = new Date();
   document.getElementById('dash-date').textContent =
@@ -539,8 +609,9 @@ function buildDashboard(plan) {
           ? `<span class="dash-duration dash-duration-end limited-end">Until ${endDateLabel}</span>`
           : '';
         const noteEl = m.note ? `<div class="dash-note">${m.note}</div>` : '';
+        const isTaken = Boolean(takenState.items[`${m.id}:${p}`]);
         return `
-          <div class="dash-card" onclick="this.classList.toggle('taken')">
+          <div class="dash-card${isTaken ? ' taken' : ''}" onclick="toggleMedicineTaken('${m.id}', '${p}')">
             <div class="dash-card-row">
               <div class="dash-card-name">${m.name}</div>
               ${doseStr ? `<div class="dash-dose">${doseStr}</div>` : ''}
@@ -554,7 +625,11 @@ function buildDashboard(plan) {
     contentsEl.appendChild(content);
   });
 
-  autoSelectTab(plan.periods);
+  if (activePeriod && plan.periods.includes(activePeriod)) {
+    switchTab(activePeriod);
+  } else {
+    autoSelectTab(plan.periods);
+  }
 }
 
 function switchTab(period) {
@@ -582,6 +657,7 @@ function hideResetDialog() { document.getElementById('reset-overlay').classList.
 
 function confirmReset() {
   localStorage.removeItem(STORAGE_KEY);
+  clearTakenStatus();
   hideResetDialog();
   showScreen('home');
 }
@@ -597,6 +673,7 @@ Object.assign(window, {
   addMedicine,
   deleteMedicine,
   submitPlan,
+  toggleMedicineTaken,
   handleSharePlan,
   hideShareDialog,
   showResetDialog,
