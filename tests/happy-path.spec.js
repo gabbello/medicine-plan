@@ -127,7 +127,7 @@ test.describe('MedPlan Happy Path Tests', () => {
 
     // Check if medicine appears in tabs
     await page.click('button.tab-btn[data-period="morning"]');
-    await expect(page.locator('text=Vitamin C')).toBeVisible();
+    await expect(page.locator('#tab-morning .dash-card-name:has-text("Vitamin C")')).toBeVisible();
   });
 
   test('Mark medicine as taken', async ({ page }) => {
