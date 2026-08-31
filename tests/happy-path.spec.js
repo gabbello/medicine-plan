@@ -15,10 +15,10 @@ test.describe('MedPlan Happy Path Tests', () => {
   });
 
   test('Home page loads and displays correctly', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('text=MedPlan')).toBeVisible();
-    await expect(page.locator('text=Build your personal medication schedule')).toBeVisible();
-    await expect(page.locator('button:has-text("Create my plan")')).toBeVisible();
+    await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 10000 });
+    await expect(page.locator('text=MedPlan')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('text=Build your personal medication schedule')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button:has-text("Create my plan")')).toBeVisible({ timeout: 5000 });
   });
 
   test('Create plan with all periods', async ({ page }) => {

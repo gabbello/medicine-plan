@@ -2,10 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests',
-  fullyParallel: false,
+  fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : 1,
+  workers: process.env.CI ? 4 : 1,
   reporter: [
     ['html', { outputFolder: 'test-results/html' }],
     ['json', { outputFile: 'test-results/results.json' }],
@@ -16,6 +16,7 @@ export default defineConfig({
     baseURL: process.env.TEST_URL || 'https://www.med-plan.uk',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    navigationTimeout: 10000,
   },
   projects: [
     {
@@ -24,8 +25,8 @@ export default defineConfig({
     },
   ],
   webServer: undefined,
-  timeout: 30000,
+  timeout: 15000,
   expect: {
-    timeout: 5000,
+    timeout: 3000,
   },
 });
