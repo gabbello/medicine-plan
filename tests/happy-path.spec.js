@@ -32,13 +32,13 @@ test.describe('MedPlan Happy Path Tests', () => {
 
     // Select all three periods
     await page.click('button[data-period="morning"]');
-    await expect(page.locator('button[data-period="morning"]')).toHaveClass(/active/);
+    await expect(page.locator('button[data-period="morning"]')).toHaveClass(/selected/);
 
     await page.click('button[data-period="afternoon"]');
-    await expect(page.locator('button[data-period="afternoon"]')).toHaveClass(/active/);
+    await expect(page.locator('button[data-period="afternoon"]')).toHaveClass(/selected/);
 
     await page.click('button[data-period="evening"]');
-    await expect(page.locator('button[data-period="evening"]')).toHaveClass(/active/);
+    await expect(page.locator('button[data-period="evening"]')).toHaveClass(/selected/);
 
     // Next button should be enabled
     const nextBtn = page.locator('#btn-step1-next');
