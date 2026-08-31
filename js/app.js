@@ -48,6 +48,7 @@ const TAKEN_STATUS_STORAGE_KEY = 'medplan_taken_status_v1';
 const SHARE_PARAM = 'plan';
 const SHARE_VERSION = 1;
 const MAX_SHARE_URL_LENGTH = 8000;
+const MS_PER_DAY = 86400000;
 const PERIOD_META = {
   morning:   { label: 'Morning',   icon: '🌅' },
   afternoon: { label: 'Afternoon', icon: '☀️' },
@@ -138,7 +139,7 @@ function clearMedicineFormErrors() {
   document.querySelectorAll('.form-group.invalid').forEach(el => el.classList.remove('invalid'));
   document.querySelectorAll('.duration-days-input.invalid').forEach(el => el.classList.remove('invalid'));
   document.querySelectorAll('.period-check.invalid').forEach(el => el.classList.remove('invalid'));
-  document.querySelectorAll('.field-error-message.active').forEach(el => {
+  document.querySelectorAll('.field-error-message').forEach(el => {
     el.textContent = '';
     el.classList.remove('active');
   });
@@ -146,7 +147,7 @@ function clearMedicineFormErrors() {
 
 function showMedicineFieldError(target, message) {
   const group = target.closest('.form-group') || target.closest('.duration-days-input');
-  const errorEl = group?.querySelector('.field-error-message');
+  const errorEl = (target.id && document.getElementById(target.id + '-error')) || group?.querySelector('.field-error-message');
   if (group) group.classList.add('invalid');
   if (target.classList.contains('period-check')) target.classList.add('invalid');
   if (target.classList.contains('duration-days-input')) target.classList.add('invalid');
@@ -184,6 +185,32 @@ function formatEndDate(startDate, days) {
   return `${day}${suffix} of ${month}`;
 }
 
+function normalizeMedicineFrequency(frequency) {
+  if (frequency && frequency.type === 'every_n_days') {
+    const n = Number(frequency.n);
+    if (Number.isInteger(n) && n >= 2) {
+      return { type: 'every_n_days', n };
+    }
+  }
+  return { type: 'daily' };
+}
+
+function formatMedicineFrequency(frequency) {
+  return frequency.type === 'every_n_days'
+    ? `every ${frequency.n} days`
+    : 'every day';
+}
+
+function getUtcDayTimestamp(value) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    return Date.UTC(year, month - 1, day);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 // --- SHARE LINKS -------------------------------------------------------------
 function clonePlanForSharing(plan) {
   return {
@@ -197,6 +224,7 @@ function clonePlanForSharing(plan) {
       unit: m.unit || '',
       note: m.note || '',
       periods: Array.isArray(m.periods) ? [...m.periods] : [],
+      frequency: normalizeMedicineFrequency(m.frequency),
       duration: m.duration && m.duration.type === 'days'
         ? { type: 'days', days: Number(m.duration.days) }
         : { type: 'ongoing' }
@@ -286,6 +314,17 @@ function validateImportedPlan(plan) {
     }
     if (med.duration.type === 'days' && (!Number.isFinite(Number(med.duration.days)) || Number(med.duration.days) <= 0)) {
       return { valid: false, message: 'This shared plan link could not be opened.' };
+    }
+    if (med.frequency) {
+      if (!['daily', 'every_n_days'].includes(med.frequency.type)) {
+        return { valid: false, message: 'This shared plan link could not be opened.' };
+      }
+      if (med.frequency.type === 'every_n_days') {
+        const n = Number(med.frequency.n);
+        if (!Number.isInteger(n) || n < 2) {
+          return { valid: false, message: 'This shared plan link could not be opened.' };
+        }
+      }
     }
   }
 
@@ -462,10 +501,19 @@ function buildPeriodChecks() {
 
 function selectDuration(btn) {
   clearMedicineFormErrors();
-  document.querySelectorAll('.duration-toggle').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#duration-row .duration-toggle').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
   const wrap = document.getElementById('duration-days-wrap');
   if (btn.dataset.val === 'days') wrap.classList.add('visible');
+  else wrap.classList.remove('visible');
+}
+
+function selectFrequency(btn) {
+  clearMedicineFormErrors();
+  document.querySelectorAll('#frequency-row .duration-toggle').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const wrap = document.getElementById('frequency-n-wrap');
+  if (btn.dataset.val === 'every_n_days') wrap.classList.add('visible');
   else wrap.classList.remove('visible');
 }
 
@@ -476,10 +524,13 @@ function resetMedForm() {
   document.getElementById('med-unit').value = '';
   document.getElementById('med-note').value = '';
   document.getElementById('duration-days').value = '';
+  document.getElementById('frequency-n').value = '';
   document.querySelectorAll('.period-check').forEach(b => b.classList.remove('selected'));
-  document.querySelectorAll('.duration-toggle').forEach(b => b.classList.remove('selected'));
-  document.querySelector('.duration-toggle[data-val="ongoing"]').classList.add('selected');
+  document.querySelectorAll('#duration-row .duration-toggle, #frequency-row .duration-toggle').forEach(b => b.classList.remove('selected'));
+  document.querySelector('#duration-row .duration-toggle[data-val="ongoing"]').classList.add('selected');
+  document.querySelector('#frequency-row .duration-toggle[data-val="daily"]').classList.add('selected');
   document.getElementById('duration-days-wrap').classList.remove('visible');
+  document.getElementById('frequency-n-wrap').classList.remove('visible');
 }
 
 function addMedicine() {
@@ -488,14 +539,18 @@ function addMedicine() {
   const nameInput = document.getElementById('med-name');
   const periodsWrap = document.getElementById('period-checks');
   const durationDaysInput = document.getElementById('duration-days');
+  const frequencyNInput = document.getElementById('frequency-n');
   const name = nameInput.value.trim();
   const amount = document.getElementById('med-amount').value.trim();
   const unit = document.getElementById('med-unit').value.trim();
   const note = document.getElementById('med-note').value.trim();
   const selectedPeriods = [...document.querySelectorAll('.period-check.selected')].map(b => b.dataset.period);
-  const durType = document.querySelector('.duration-toggle.selected').dataset.val;
+  const durType = document.querySelector('#duration-row .duration-toggle.selected').dataset.val;
   const durDaysValue = durationDaysInput.value.trim();
   const durDays = durDaysValue === '' ? null : parseInt(durDaysValue, 10);
+  const frequencyType = document.querySelector('#frequency-row .duration-toggle.selected').dataset.val;
+  const frequencyNValue = frequencyNInput.value.trim();
+  const frequencyN = frequencyNValue === '' ? null : parseInt(frequencyNValue, 10);
   let hasError = false;
 
   if (!name) {
@@ -513,6 +568,11 @@ function addMedicine() {
     hasError = true;
   }
 
+  if (frequencyType === 'every_n_days' && (!Number.isInteger(frequencyN) || frequencyN < 2)) {
+    showMedicineFieldError(frequencyNInput, 'Please enter a number of days greater than 1.');
+    hasError = true;
+  }
+
   if (hasError) {
     focusFirstMedicineError();
     return;
@@ -525,6 +585,7 @@ function addMedicine() {
     unit,
     note,
     periods: selectedPeriods,
+    frequency: frequencyType === 'every_n_days' ? { type: 'every_n_days', n: frequencyN } : { type: 'daily' },
     duration: durType === 'days' ? { type: 'days', days: durDays } : { type: 'ongoing' }
   };
 
@@ -546,19 +607,23 @@ function renderMedicineList() {
   if (draft.medicines.length === 0) { list.innerHTML = ''; return; }
 
   list.innerHTML = '<div class="section-label">Added medicines</div>' +
-    draft.medicines.map(m => `
-      <div class="medicine-item">
-        <div class="medicine-item-left">
-          <div class="medicine-item-name">${m.name}</div>
-          <div class="medicine-item-meta">
-            ${[m.amount, m.unit].filter(Boolean).join(' ')}
-            ${m.periods.map(p => PERIOD_META[p].icon).join(' ')}
-            ${m.duration.type === 'days' ? '· ' + m.duration.days + ' days' : '· ongoing'}
+    draft.medicines.map(m => {
+      const frequency = normalizeMedicineFrequency(m.frequency);
+      return `
+        <div class="medicine-item">
+          <div class="medicine-item-left">
+            <div class="medicine-item-name">${m.name}</div>
+            <div class="medicine-item-meta">
+              ${[m.amount, m.unit].filter(Boolean).join(' ')}
+              ${m.periods.map(p => PERIOD_META[p].icon).join(' ')}
+              ${m.duration.type === 'days' ? '· ' + m.duration.days + ' days' : '· ongoing'}
+              ${frequency.type === 'every_n_days' ? '· ' + formatMedicineFrequency(frequency) : ''}
+            </div>
           </div>
+          <button class="delete-btn" onclick="deleteMedicine('${m.id}')">✕</button>
         </div>
-        <button class="delete-btn" onclick="deleteMedicine('${m.id}')">✕</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 }
 
 function updateSubmitBtn() {
@@ -578,6 +643,23 @@ function submitPlan() {
 }
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────────────
+function isMedicineScheduledToday(med, planStartDate) {
+  if (!med.frequency || med.frequency.type === 'daily') return true;
+  if (med.frequency.type === 'every_n_days') {
+    const n = Number(med.frequency.n);
+    if (!Number.isInteger(n) || n < 2) return true;
+    const startUtcDay = getUtcDayTimestamp(planStartDate);
+    if (startUtcDay === null) return true;
+    const todayUtcDay = getUtcDayTimestamp(new Date());
+    if (todayUtcDay === null) return true;
+    const daysSinceStart = Math.floor((todayUtcDay - startUtcDay) / MS_PER_DAY);
+    // Every-N-days schedules start on the plan start date and do not appear before it.
+    if (daysSinceStart < 0) return false;
+    return daysSinceStart % n === 0;
+  }
+  return true;
+}
+
 function buildDashboard(plan) {
   const takenState = loadTakenStatus();
   const activePeriod = document.querySelector('.tab-btn.active')?.dataset.period || null;
@@ -605,7 +687,7 @@ function buildDashboard(plan) {
     content.className = 'tab-content';
     content.id = 'tab-' + p;
 
-    const meds = plan.medicines.filter(m => m.periods.includes(p));
+    const meds = plan.medicines.filter(m => m.periods.includes(p) && isMedicineScheduledToday(m, plan.startDate));
     if (meds.length === 0) {
       content.innerHTML = '<div class="empty-period">No medicines for this period.</div>';
     } else {
@@ -683,6 +765,7 @@ Object.assign(window, {
   togglePeriod,
   goToStep2,
   selectDuration,
+  selectFrequency,
   addMedicine,
   deleteMedicine,
   submitPlan,

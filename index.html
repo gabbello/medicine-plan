@@ -135,7 +135,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
     <div class="form-group">
       <label>Duration</label>
-      <div class="duration-row">
+      <div class="duration-row" id="duration-row">
         <button class="duration-toggle selected" data-val="ongoing" onclick="selectDuration(this)">Ongoing</button>
         <button class="duration-toggle" data-val="days" onclick="selectDuration(this)">Limited</button>
         <div class="duration-days-input" id="duration-days-wrap">
@@ -144,6 +144,19 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         </div>
       </div>
       <div class="field-error-message" id="duration-days-error"></div>
+    </div>
+
+    <div class="form-group">
+      <label>Frequency</label>
+      <div class="duration-row" id="frequency-row">
+        <button class="duration-toggle selected" data-val="daily" onclick="selectFrequency(this)">Every day</button>
+        <button class="duration-toggle" data-val="every_n_days" onclick="selectFrequency(this)">Every N days</button>
+        <div class="frequency-n-input" id="frequency-n-wrap">
+          <input type="number" id="frequency-n" placeholder="2" min="2">
+          <span>days</span>
+        </div>
+      </div>
+      <div class="field-error-message" id="frequency-n-error"></div>
     </div>
 
     <div class="form-group">
