@@ -99,7 +99,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await submitBtn.click();
 
     // Should navigate to dashboard
-    await expect(page.locator('text=Morning')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button[data-period="morning"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('Dashboard displays medicines by period', async ({ page }) => {
@@ -122,8 +122,8 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.click('#btn-submit');
 
     // Dashboard should show tabs for selected periods
-    await expect(page.locator('text=Morning')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Afternoon')).toBeVisible();
+    await expect(page.locator('button[data-period="morning"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button[data-period="afternoon"]')).toBeVisible();
 
     // Check if medicine appears in tabs
     const morningTab = page.locator('button:has-text("Morning")');
@@ -149,7 +149,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.click('#btn-submit');
 
     // Mark medicine as taken
-    await expect(page.locator('text=Paracetamol')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.dash-card-name:has-text("Paracetamol")')).toBeVisible({ timeout: 5000 });
 
     const checkbox = page.locator('input[type="checkbox"]').first();
     await checkbox.check();
@@ -217,7 +217,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.click('#btn-submit');
 
     // Wait for dashboard
-    await expect(page.locator('text=Metformin')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.dash-card-name:has-text("Metformin")')).toBeVisible({ timeout: 5000 });
 
     // Click reset button
     await page.click('button:has-text("Reset plan")');
@@ -267,7 +267,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await newPage.goto(`/?plan=${planParam}`);
 
     // Dashboard should load with the plan
-    await expect(newPage.locator('text=Atorvastatin')).toBeVisible({ timeout: 5000 });
+    await expect(newPage.locator('.dash-card-name:has-text("Atorvastatin")')).toBeVisible({ timeout: 5000 });
 
     await newContext.close();
   });
