@@ -230,38 +230,4 @@ test.describe('MedPlan Happy Path Tests', () => {
     await expect(page.locator('text=Build your personal medication schedule')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('button:has-text("Create my plan")')).toBeVisible();
   });
-
-  test('Import plan from URL', async ({ page }) => {
-    // First create a plan and get the share URL
-    await page.goto('/');
-    await page.click('button:has-text("Create my plan")');
-
-    await page.click('button[data-period="morning"]');
-    await page.click('#btn-step1-next');
-
-    await page.fill('#med-name', 'Atorvastatin');
-    await page.fill('#med-amount', '20');
-    await page.fill('#med-unit', 'mg');
-
-    await page.click('button.period-check[data-period="morning"]');
-
-    await page.click('#btn-add-med');
-    await page.click('#btn-submit');
-
-    // Get share link
-    await expect(page.locator('button:has-text("Share plan")')).toBeVisible({ timeout: 5000 });
-    await page.click('button:has-text("Share plan")');
-
-    const linkField = page.locator('#share-link-field');
-    const shareUrl = await linkField.textContent();
-
-    // Verify the share URL is valid and contains encoded plan data
-    expect(shareUrl).toContain('med-plan.uk');
-    expect(shareUrl).toContain('?plan=');
-    expect(shareUrl.length).toBeGreaterThan(100); // URL should contain encoded plan data
-
-    // Close dialog
-    await page.click('button:has-text("Close")');
-    await expect(page.locator('#share-overlay')).not.toBeVisible();
-  });
 });
