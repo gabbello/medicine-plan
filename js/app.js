@@ -146,7 +146,7 @@ function clearMedicineFormErrors() {
 
 function showMedicineFieldError(target, message) {
   const group = target.closest('.form-group') || target.closest('.duration-days-input');
-  const errorEl = group?.querySelector('.field-error-message');
+  const errorEl = (target.id && document.getElementById(target.id + '-error')) || group?.querySelector('.field-error-message');
   if (group) group.classList.add('invalid');
   if (target.classList.contains('period-check')) target.classList.add('invalid');
   if (target.classList.contains('duration-days-input')) target.classList.add('invalid');
@@ -647,6 +647,7 @@ function isMedicineScheduledToday(med, planStartDate) {
       Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
       Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
     ) / 86400000);
+    // Every-N-days schedules start on the plan start date and do not appear before it.
     if (daysSinceStart < 0) return false;
     return daysSinceStart % n === 0;
   }
