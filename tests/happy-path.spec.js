@@ -253,7 +253,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.click('button:has-text("Share plan")');
 
     const linkField = page.locator('#share-link-field');
-    const shareUrl = await linkField.inputValue();
+    const shareUrl = await linkField.textContent();
 
     // Verify the share URL is valid and contains encoded plan data
     expect(shareUrl).toContain('med-plan.uk');
