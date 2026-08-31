@@ -16,7 +16,7 @@ test.describe('MedPlan Happy Path Tests', () => {
 
   test('Home page loads and displays correctly', async ({ page }) => {
     await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 10000 });
-    await expect(page.locator('text=MedPlan')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('h1:has-text("MedPlan")')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Build your personal medication schedule')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('button:has-text("Create my plan")')).toBeVisible({ timeout: 5000 });
   });
@@ -53,7 +53,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.goto('/');
     await page.click('button:has-text("Create my plan")');
 
-    // Select periods
+    // Select periods on Step 1
     await page.click('button[data-period="morning"]');
     await page.click('button[data-period="afternoon"]');
     await page.click('button[data-period="evening"]');
@@ -99,7 +99,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await submitBtn.click();
 
     // Should navigate to dashboard
-    await expect(page.locator('button[data-period="morning"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button.tab-btn[data-period="morning"]')).toBeVisible({ timeout: 5000 });
   });
 
   test('Dashboard displays medicines by period', async ({ page }) => {
@@ -122,8 +122,8 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.click('#btn-submit');
 
     // Dashboard should show tabs for selected periods
-    await expect(page.locator('button[data-period="morning"]')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('button[data-period="afternoon"]')).toBeVisible();
+    await expect(page.locator('button.tab-btn[data-period="morning"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button.tab-btn[data-period="afternoon"]')).toBeVisible();
 
     // Check if medicine appears in tabs
     const morningTab = page.locator('button:has-text("Morning")');
@@ -151,15 +151,15 @@ test.describe('MedPlan Happy Path Tests', () => {
     // Mark medicine as taken
     await expect(page.locator('.dash-card-name:has-text("Paracetamol")')).toBeVisible({ timeout: 5000 });
 
-    const checkbox = page.locator('input[type="checkbox"]').first();
-    await checkbox.check();
+    const card = page.locator('.dash-card').first();
+    await card.click();
 
-    // Verify checkbox is checked
-    await expect(checkbox).toBeChecked();
+    // Verify card is marked as taken (has 'taken' class)
+    await expect(card).toHaveClass(/taken/);
 
     // Reload page and verify status persists
     await page.reload();
-    await expect(checkbox).toBeChecked();
+    await expect(card).toHaveClass(/taken/);
   });
 
   test('Share plan generates link', async ({ page }) => {
@@ -261,7 +261,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     const newPage = await newContext.newPage();
 
     // Extract just the plan parameter
-    const urlObj = new URL(shareUrl);
+    const urlObj = new URL(shareUrl, page.url());
     const planParam = urlObj.searchParams.get('plan');
 
     await newPage.goto(`/?plan=${planParam}`);
