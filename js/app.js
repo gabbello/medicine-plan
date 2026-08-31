@@ -201,6 +201,16 @@ function formatMedicineFrequency(frequency) {
     : 'every day';
 }
 
+function getUtcDayTimestamp(value) {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    return Date.UTC(year, month - 1, day);
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 // --- SHARE LINKS -------------------------------------------------------------
 function clonePlanForSharing(plan) {
   return {
@@ -638,15 +648,11 @@ function isMedicineScheduledToday(med, planStartDate) {
   if (med.frequency.type === 'every_n_days') {
     const n = Number(med.frequency.n);
     if (!Number.isInteger(n) || n < 2) return true;
-    const start = new Date(planStartDate);
-    if (Number.isNaN(start.getTime())) return true;
-    start.setHours(0, 0, 0, 0);
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const daysSinceStart = Math.floor((
-      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
-      Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
-    ) / MS_PER_DAY);
+    const startUtcDay = getUtcDayTimestamp(planStartDate);
+    if (startUtcDay === null) return true;
+    const todayUtcDay = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const daysSinceStart = Math.floor((todayUtcDay - startUtcDay) / MS_PER_DAY);
     // Every-N-days schedules start on the plan start date and do not appear before it.
     if (daysSinceStart < 0) return false;
     return daysSinceStart % n === 0;
