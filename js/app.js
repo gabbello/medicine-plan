@@ -214,9 +214,7 @@ function clonePlanForSharing(plan) {
       unit: m.unit || '',
       note: m.note || '',
       periods: Array.isArray(m.periods) ? [...m.periods] : [],
-      frequency: m.frequency && m.frequency.type === 'every_n_days'
-        ? { type: 'every_n_days', n: Number(m.frequency.n) }
-        : { type: 'daily' },
+      frequency: normalizeMedicineFrequency(m.frequency),
       duration: m.duration && m.duration.type === 'days'
         ? { type: 'days', days: Number(m.duration.days) }
         : { type: 'ongoing' }
@@ -638,6 +636,7 @@ function isMedicineScheduledToday(med, planStartDate) {
     const n = Number(med.frequency.n);
     if (!Number.isInteger(n) || n < 2) return true;
     const start = new Date(planStartDate);
+    if (Number.isNaN(start.getTime())) return true;
     start.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
