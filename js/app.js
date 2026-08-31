@@ -139,7 +139,7 @@ function clearMedicineFormErrors() {
   document.querySelectorAll('.form-group.invalid').forEach(el => el.classList.remove('invalid'));
   document.querySelectorAll('.duration-days-input.invalid').forEach(el => el.classList.remove('invalid'));
   document.querySelectorAll('.period-check.invalid').forEach(el => el.classList.remove('invalid'));
-  document.querySelectorAll('.field-error-message.active').forEach(el => {
+  document.querySelectorAll('.field-error-message').forEach(el => {
     el.textContent = '';
     el.classList.remove('active');
   });
