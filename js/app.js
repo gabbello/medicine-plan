@@ -643,7 +643,10 @@ function isMedicineScheduledToday(med, planStartDate) {
     start.setHours(0, 0, 0, 0);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const daysSinceStart = Math.round((today - start) / 86400000);
+    const daysSinceStart = Math.floor((
+      Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
+      Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
+    ) / 86400000);
     if (daysSinceStart < 0) return false;
     return daysSinceStart % n === 0;
   }
