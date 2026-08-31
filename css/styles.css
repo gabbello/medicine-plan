@@ -317,6 +317,16 @@ input:focus { border-color: var(--accent); }
 .duration-days-input input { width: 60px; }
 .duration-days-input span { font-size: 0.78rem; color: var(--text-muted); }
 
+.frequency-n-input {
+  display: none;
+  align-items: center;
+  gap: 6px;
+}
+
+.frequency-n-input.visible { display: flex; }
+.frequency-n-input input { width: 60px; }
+.frequency-n-input span { font-size: 0.78rem; color: var(--text-muted); }
+
 /* BUTTONS */
 .btn {
   border: none;
