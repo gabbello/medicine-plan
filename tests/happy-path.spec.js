@@ -126,8 +126,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await expect(page.locator('button.tab-btn[data-period="afternoon"]')).toBeVisible();
 
     // Check if medicine appears in tabs
-    const morningTab = page.locator('button:has-text("Morning")');
-    await morningTab.click();
+    await page.click('button.tab-btn[data-period="morning"]');
     await expect(page.locator('text=Vitamin C')).toBeVisible();
   });
 
@@ -260,11 +259,8 @@ test.describe('MedPlan Happy Path Tests', () => {
     const newContext = await page.context().browser().newContext();
     const newPage = await newContext.newPage();
 
-    // Extract just the plan parameter
-    const urlObj = new URL(shareUrl, page.url());
-    const planParam = urlObj.searchParams.get('plan');
-
-    await newPage.goto(`/?plan=${planParam}`);
+    // Use the share URL directly (it's already a full URL)
+    await newPage.goto(shareUrl);
 
     // Dashboard should load with the plan
     await expect(newPage.locator('.dash-card-name:has-text("Atorvastatin")')).toBeVisible({ timeout: 5000 });
