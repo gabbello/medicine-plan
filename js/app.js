@@ -597,20 +597,23 @@ function renderMedicineList() {
   if (draft.medicines.length === 0) { list.innerHTML = ''; return; }
 
   list.innerHTML = '<div class="section-label">Added medicines</div>' +
-    draft.medicines.map(m => `
-      <div class="medicine-item">
-        <div class="medicine-item-left">
-          <div class="medicine-item-name">${m.name}</div>
-          <div class="medicine-item-meta">
-            ${[m.amount, m.unit].filter(Boolean).join(' ')}
-            ${m.periods.map(p => PERIOD_META[p].icon).join(' ')}
-            ${m.duration.type === 'days' ? '· ' + m.duration.days + ' days' : '· ongoing'}
-            ${normalizeMedicineFrequency(m.frequency).type === 'every_n_days' ? '· ' + formatMedicineFrequency(m.frequency) : ''}
+    draft.medicines.map(m => {
+      const frequency = normalizeMedicineFrequency(m.frequency);
+      return `
+        <div class="medicine-item">
+          <div class="medicine-item-left">
+            <div class="medicine-item-name">${m.name}</div>
+            <div class="medicine-item-meta">
+              ${[m.amount, m.unit].filter(Boolean).join(' ')}
+              ${m.periods.map(p => PERIOD_META[p].icon).join(' ')}
+              ${m.duration.type === 'days' ? '· ' + m.duration.days + ' days' : '· ongoing'}
+              ${frequency.type === 'every_n_days' ? '· ' + formatMedicineFrequency(frequency) : ''}
+            </div>
           </div>
+          <button class="delete-btn" onclick="deleteMedicine('${m.id}')">✕</button>
         </div>
-        <button class="delete-btn" onclick="deleteMedicine('${m.id}')">✕</button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 }
 
 function updateSubmitBtn() {
@@ -641,6 +644,7 @@ function isMedicineScheduledToday(med, planStartDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const daysSinceStart = Math.round((today - start) / 86400000);
+    if (daysSinceStart < 0) return false;
     return daysSinceStart % n === 0;
   }
   return true;
