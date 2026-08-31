@@ -1,10 +1,17 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('MedPlan Happy Path Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    // Clear localStorage before each test
-    await page.context().clearCookies();
-    await page.evaluate(() => localStorage.clear());
+  test.beforeEach(async ({ page, context }) => {
+    // Clear storage before each test using Playwright's API
+    await context.clearCookies();
+    await page.goto('/');
+    await page.evaluate(() => {
+      try {
+        localStorage.clear();
+      } catch (e) {
+        // localStorage may not be accessible in some contexts
+      }
+    });
   });
 
   test('Home page loads and displays correctly', async ({ page }) => {
