@@ -48,6 +48,7 @@ const TAKEN_STATUS_STORAGE_KEY = 'medplan_taken_status_v1';
 const SHARE_PARAM = 'plan';
 const SHARE_VERSION = 1;
 const MAX_SHARE_URL_LENGTH = 8000;
+const MS_PER_DAY = 86400000;
 const PERIOD_META = {
   morning:   { label: 'Morning',   icon: '🌅' },
   afternoon: { label: 'Afternoon', icon: '☀️' },
@@ -195,9 +196,8 @@ function normalizeMedicineFrequency(frequency) {
 }
 
 function formatMedicineFrequency(frequency) {
-  const normalizedFrequency = normalizeMedicineFrequency(frequency);
-  return normalizedFrequency.type === 'every_n_days'
-    ? `every ${normalizedFrequency.n} days`
+  return frequency.type === 'every_n_days'
+    ? `every ${frequency.n} days`
     : 'every day';
 }
 
@@ -646,7 +646,7 @@ function isMedicineScheduledToday(med, planStartDate) {
     const daysSinceStart = Math.floor((
       Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()) -
       Date.UTC(start.getFullYear(), start.getMonth(), start.getDate())
-    ) / 86400000);
+    ) / MS_PER_DAY);
     // Every-N-days schedules start on the plan start date and do not appear before it.
     if (daysSinceStart < 0) return false;
     return daysSinceStart % n === 0;
