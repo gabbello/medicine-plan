@@ -65,10 +65,8 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-unit', 'tablet');
 
     // Select morning and evening for this medicine
-    const morningCheck = page.locator('input[value="morning"]');
-    const eveningCheck = page.locator('input[value="evening"]');
-    await morningCheck.check();
-    await eveningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
+    await page.click('button.period-check[data-period="evening"]');
 
     // Keep it as Ongoing (default)
     await page.click('#btn-add-med');
@@ -82,10 +80,9 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-unit', 'tablets');
 
     // Select all periods
-    const afternoonCheck = page.locator('input[value="afternoon"]');
-    await morningCheck.check();
-    await afternoonCheck.check();
-    await eveningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
+    await page.click('button.period-check[data-period="afternoon"]');
+    await page.click('button.period-check[data-period="evening"]');
 
     // Switch to limited duration
     await page.click('button[data-val="days"]');
@@ -118,10 +115,8 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-amount', '1000');
     await page.fill('#med-unit', 'mg');
 
-    const morningCheck = page.locator('input[value="morning"]');
-    const afternoonCheck = page.locator('input[value="afternoon"]');
-    await morningCheck.check();
-    await afternoonCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
+    await page.click('button.period-check[data-period="afternoon"]');
 
     await page.click('#btn-add-med');
     await page.click('#btn-submit');
@@ -148,8 +143,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-amount', '500');
     await page.fill('#med-unit', 'mg');
 
-    const morningCheck = page.locator('input[value="morning"]');
-    await morningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
 
     await page.click('#btn-add-med');
     await page.click('#btn-submit');
@@ -180,8 +174,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-amount', '10');
     await page.fill('#med-unit', 'mg');
 
-    const morningCheck = page.locator('input[value="morning"]');
-    await morningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
 
     await page.click('#btn-add-med');
     await page.click('#btn-submit');
@@ -218,8 +211,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-amount', '500');
     await page.fill('#med-unit', 'mg');
 
-    const morningCheck = page.locator('input[value="morning"]');
-    await morningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
 
     await page.click('#btn-add-med');
     await page.click('#btn-submit');
@@ -252,8 +244,7 @@ test.describe('MedPlan Happy Path Tests', () => {
     await page.fill('#med-amount', '20');
     await page.fill('#med-unit', 'mg');
 
-    const morningCheck = page.locator('input[value="morning"]');
-    await morningCheck.check();
+    await page.click('button.period-check[data-period="morning"]');
 
     await page.click('#btn-add-med');
     await page.click('#btn-submit');
