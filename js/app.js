@@ -648,10 +648,10 @@ function isMedicineScheduledToday(med, planStartDate) {
   if (med.frequency.type === 'every_n_days') {
     const n = Number(med.frequency.n);
     if (!Number.isInteger(n) || n < 2) return true;
-    const today = new Date();
     const startUtcDay = getUtcDayTimestamp(planStartDate);
     if (startUtcDay === null) return true;
-    const todayUtcDay = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayUtcDay = getUtcDayTimestamp(new Date());
+    if (todayUtcDay === null) return true;
     const daysSinceStart = Math.floor((todayUtcDay - startUtcDay) / MS_PER_DAY);
     // Every-N-days schedules start on the plan start date and do not appear before it.
     if (daysSinceStart < 0) return false;
