@@ -1,0 +1,46 @@
+name: Happy Path Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL to test (default: production)'
+        required: false
+        default: 'https://www.med-plan.uk'
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run happy path tests
+        env:
+          TEST_URL: ${{ inputs.url || 'https://www.med-plan.uk' }}
+        run: npm run test:happy-path
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+          retention-days: 30
+
+      - name: Test Summary
+        if: always()
+        run: |
+          echo "## Happy Path Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f test-results/summary.txt ]; then
+            cat test-results/summary.txt >> $GITHUB_STEP_SUMMARY
+          fi

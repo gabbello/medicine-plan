@@ -1,0 +1,12 @@
+{
+  "name": "medicine-plan",
+  "version": "1.0.0",
+  "description": "Personal Medication Schedule Planner",
+  "type": "module",
+  "scripts": {
+    "test:happy-path": "playwright test --reporter=html,json tests/happy-path.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}
