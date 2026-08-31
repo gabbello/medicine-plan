@@ -260,7 +260,10 @@ test.describe('MedPlan Happy Path Tests', () => {
     const newPage = await newContext.newPage();
 
     // Use the share URL directly (it's already a full URL)
-    await newPage.goto(shareUrl);
+    await newPage.goto(shareUrl, { waitUntil: 'domcontentloaded', timeout: 10000 });
+
+    // Wait for dashboard to load (check for date element first)
+    await expect(newPage.locator('.date-line')).toBeVisible({ timeout: 5000 });
 
     // Dashboard should load with the plan
     await expect(newPage.locator('.dash-card-name:has-text("Atorvastatin")')).toBeVisible({ timeout: 5000 });
